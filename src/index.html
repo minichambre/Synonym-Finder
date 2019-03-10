@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./css/main.css">
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Neucha" rel="stylesheet">
+    <title>Synonym Finder</title>
+  </head>
+  <body>
+    <div id="toolbar" class="noselect">
+      <a href="#" id="minimise"class="minimise toolbarButton" onclick="minimise()"> _ </a>
+      <a href="#" id="close"class="close toolbarButton" onclick="closeWindow()"> x </a>
+
+    </div>
+    <div id="content">
+      <h1 class="noselect"> Synonym Finder </h1>
+      <h3 class="noselect"> Enter a sentence up to 10 words long </h3>
+      <div class="search">
+        <input id="sentence" type="text" name="sentence" value="Pineapples"></input>
+        <input id="submit" type="submit" value="Search" onclick="search()">
+      </div>
+      <p id="error"> </p>
+      <h3 id="newSentence"></h3>
+    </div>
+  </body>
+  <script type="text/JavaScript">
+
+    document.getElementById('search').addEventListener('click', function(e) {
+      search()
+    });
+    var words;
+
+    function lookup(word){
+      if (window.XMLHttpRequest) { // Mozilla, Safari, IE7+ ...
+          httpRequest = new XMLHttpRequest();
+      } else if (window.ActiveXObject) { // IE 6 and older
+          httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+      }
+
+      httpRequest.onreadystatechange = function(){
+        if (httpRequest.readyState === XMLHttpRequest.DONE) {
+          if (httpRequest.status === 200) {
+            //console.log(httpRequest.responseText);
+            consumeJson(httpRequest.responseText, word);
+          } else {
+            console.log("error");
+          }
+        } else {
+            // Not ready yet.
+        }
+      };
+      httpRequest.open('GET', 'https://dictionaryapi.com/api/v3/references/thesaurus/json/'+ word +'?key=85898d4a-ed99-47bb-843e-c11f078085bd', true);
+      httpRequest.send();
+
+    }
+
+    function search(element){
+      currentSentence = document.getElementById('sentence').value;
+      document.getElementById('newSentence').innerHTML = "";
+      document.getElementById("error").style.display = "none";
+      words = currentSentence.split(" ");
+      console.log(words.length);
+      if (words.length > 10){
+        throwError("That's a bit long isn't it?");
+        return;
+      }
+      lookup(words.shift());
+    }
+
+    function consumeJson(json, originalWord){
+      defintions = JSON.parse(json);
+      if (defintions[0].meta !== undefined){
+        syns = defintions[0].meta.syns[0];
+        word = syns[Math.floor(Math.random() * Math.floor((syns.length-1)))];
+      } else {
+        word = originalWord;
+      }
+
+      console.log("Replacing " + originalWord + " with " + word);
+      document.getElementById('newSentence').innerHTML = document.getElementById('newSentence').innerHTML  + " " + word;
+      if (words.length > 0){
+        lookup(words.shift());
+      }
+    }
+
+    function throwError(error){
+      console.log("trying to error");
+      var errorNode = document.getElementById("error");
+      errorNode.innerHTML = "";
+      errorNode.innerHTML = error;
+      errorNode.style.display = "block";
+    }
+
+
+    function minimise(){
+      const ipc = require('electron').ipcRenderer;
+      ipc.send('minimise-main-window');
+    }
+
+    function closeWindow(){
+      const ipc = require('electron').ipcRenderer;
+      ipc.send('close-main-window');
+    }
+  </script>
+</html>
