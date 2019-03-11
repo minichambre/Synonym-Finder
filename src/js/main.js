@@ -51,7 +51,7 @@
         var word = originalWord
       }
       else if (defintions[0].meta !== undefined ){
-        var syns = defintions[0].meta.syns[0];
+        var syns = defintions[Math.floor(Math.random() * Math.floor((defintions.length-1)))].meta.syns[0];
         var word = syns[Math.floor(Math.random() * Math.floor((syns.length-1)))];
       } else {
         var word = originalWord;
@@ -79,4 +79,9 @@
     function closeWindow(){
       const ipc = require('electron').ipcRenderer;
       ipc.send('close-main-window');
+    }
+
+
+    function makeWordLink(word){
+
     }
