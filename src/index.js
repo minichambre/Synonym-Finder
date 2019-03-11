@@ -8,7 +8,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
-
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -16,6 +15,10 @@ const createWindow = () => {
     height: 650,
     //resizable: false,
     //frame: false
+    webPreferences: {
+      nodeIntegration: false,
+      nodeIntegrationInWorker: false
+    }
   });
 
   // and load the index.html of the app.

@@ -1,10 +1,16 @@
-
-    document.getElementById('search').addEventListener('click', function(e) {
-      search()
-    });
     var words;
-
+    const blacklistedWords = ["i", "the", "and"];
     function lookup(word){
+
+      if (blacklistedWords.includes(word.toLowerCase())){
+        document.getElementById('newSentence').innerHTML = document.getElementById('newSentence').innerHTML  + " " + word;
+        if (words.length > 0){
+          lookup(words.shift());
+        }
+        return;
+      }
+
+
       if (window.XMLHttpRequest) { // Mozilla, Safari, IE7+ ...
           var httpRequest = new XMLHttpRequest();
       } else if (window.ActiveXObject) { // IE 6 and older
@@ -17,10 +23,8 @@
             //console.log(httpRequest.responseText);
             consumeJson(httpRequest.responseText, word);
           } else {
-            console.log("error");
+            throwError("The thesaurus is on fire. Try again later.")
           }
-        } else {
-            // Not ready yet.
         }
       };
       httpRequest.open('GET', 'https://dictionaryapi.com/api/v3/references/thesaurus/json/'+ word +'?key=85898d4a-ed99-47bb-843e-c11f078085bd', true);
@@ -33,7 +37,7 @@
       document.getElementById('newSentence').innerHTML = "";
       document.getElementById("error").style.display = "none";
       words = currentSentence.split(" ");
-      console.log(words.length);
+
       if (words.length > 10){
         throwError("That's a bit long isn't it?");
         return;
@@ -53,7 +57,6 @@
         var word = originalWord;
       }
 
-      console.log("Replacing " + originalWord + " with " + word);
       document.getElementById('newSentence').innerHTML = document.getElementById('newSentence').innerHTML  + " " + word;
       if (words.length > 0){
         lookup(words.shift());
@@ -61,7 +64,6 @@
     }
 
     function throwError(error){
-      console.log("trying to error");
       var errorNode = document.getElementById("error");
       errorNode.innerHTML = "";
       errorNode.innerHTML = error;
